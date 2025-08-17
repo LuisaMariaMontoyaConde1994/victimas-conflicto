@@ -1,4 +1,3 @@
-json
 unicodedata
 pandas
 streamlit
