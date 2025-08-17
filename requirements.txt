@@ -1,6 +1,4 @@
-unicodedata
 pandas
 streamlit
-plotly.express
-b64encode
-Path
+plotly
+pyarrow
