@@ -13,6 +13,29 @@ DATA_DIR = Path(__file__).parent / "data"
 ASSETS_DIR = DATA_DIR / "assets"    # dentro de tu carpeta data crea "assets"
 BG_PATH = ASSETS_DIR / "imagen1dashboard.jpg"  # cambia el nombre si tu imagen se llama distinto
 
+def anchor(id_: str):
+    # Inserta un ancla invisible para que <a href="#id"> salte aquí
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+
+# CSS para TOC fijo y scroll suave
+st.markdown("""
+<style>
+  html { scroll-behavior: smooth; }
+  .toc-box {
+    position: sticky; top: 80px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 14px; padding: 14px 14px;
+    box-shadow: 0 6px 18px rgba(15,23,42,0.08);
+    font-size: 0.95rem;
+  }
+  .toc-box a { text-decoration:none; color:#0f172a; }
+  .toc-box a:hover { text-decoration:underline; }
+  .toc-title { font-weight:700; margin-bottom:8px; }
+  .toc-ul { list-style: none; padding-left: 0; margin: 0; }
+  .toc-ul li { margin: 6px 0; }
+  .toc-ul li ul { margin-top:6px; margin-left:14px; }
+</style>
+""", unsafe_allow_html=True)
 
 
 def set_background(img_path: Path):
@@ -53,19 +76,53 @@ def set_background(img_path: Path):
 set_background(BG_PATH)
 
 st.markdown("""
-<div class="hero">
-  <h1>🕊️ Memoria de las Víctimas: Desaparición Forzada en Colombia (2000–2023)</h1>
-  <p>Datos consolidados para comprender tendencias nacionales, características de las víctimas y su situación actual.</p>
-</div>
+<h1 style='text-align:center; font-size:2.3rem; margin-bottom:0.4em;'>
+🕊️ Memoria a las  Víctimas: Víctimas del conflicto  Armado en Colombia (1950–2024)
+</h1>
+<p style='text-align:center; color:#374151; font-size:1.05rem; margin-top:0;'>
+Datos consolidados para comprender tendencias nacionales, características de las víctimas y su situación actual.
+</p>
 """, unsafe_allow_html=True)
+
 st.markdown("""
-<div style="background-color: rgba(255,255,255,0.7); padding: 16px; border-radius: 12px; font-size:1.05rem; text-align:justify;">
-Esta base de datos recopila y organiza los registros de desaparición en Colombia entre los años 2000 y 2023. 
-Incluye variables sociodemográficas y territoriales que permiten analizar patrones de género, edad, etnia y 
-situación actual de las víctimas. Su propósito es facilitar la exploración interactiva de la información 
-y contribuir a la comprensión de un fenómeno que sigue marcando la historia del país.
+<div style="
+  background: rgba(255,255,255,0.82);
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow: 0 8px 24px rgba(15,23,42,0.08);
+  backdrop-filter: blur(4px);
+  font-size: 1.05rem;
+  text-align: justify;
+">
+<p>
+Esta aplicación integra dos fuentes de información oficiales descargadas desde <strong>Datos Abiertos</strong>
+(Plataforma del Gobierno de Colombia):
+</p>
+
+<ul>
+  <li><strong>Base 1 (2002–2023):</strong> conjunto completo y consolidado para el análisis principal de desaparición forzada
+      a nivel nacional (serie continua y homogénea).</li>
+  <li><strong>Base 2 (1944–2024):</strong> <em>muestra representativa</em> utilizada de forma complementaria para aportar contexto
+      histórico ampliado y contrastar patrones.</li>
+</ul>
+
+<p>
+El tablero permite explorar variables sociodemográficas y territoriales para identificar patrones de género, edad,
+pertenencia étnica y situación actual de las víctimas. Cada número representa una historia; el propósito es facilitar
+una lectura responsable de la información, contribuir a la construcción de memoria y promover decisiones informadas.
+</p>
+
+<p style="margin-top:10px; color:#475569; font-size:0.95rem;">
+<strong>Nota metodológica:</strong> los indicadores principales se presentan con la Base 1 (2002–2023).
+La Base 2 se usa solo como referencia histórica agregada; por su carácter muestral no debe compararse 1:1
+con las cifras consolidadas.
+</p>
 </div>
 """, unsafe_allow_html=True)
+
+
+
+
 
 
 
@@ -127,6 +184,79 @@ res_anio["ANO"] = res_anio["ANO"].astype(int)
 PREF_MIN, PREF_MAX = 2000, 2023
 res_anio = res_anio[(res_anio["ANO"] >= PREF_MIN) & (res_anio["ANO"] <= PREF_MAX)]
 
+col_main, col_toc = st.columns([4, 1])  # 4/1 ó 3/1 según prefieras
+
+
+st.sidebar.markdown("""
+<div class="toc">
+  <div style="font-weight:700; margin-bottom:6px;">📑 Secciones</div>
+  <ul>
+    <li>
+      <details open>
+        <summary><a href="#panorama" id="lnk-panorama">Panorama nacional</a></summary>
+        <ul>
+          <li><a href="#serie" id="lnk-serie">Serie anual</a></li>
+          <li><a href="#top10" id="lnk-top10">Top 10 departamentos</a></li>
+          <li><a href="#mapa" id="lnk-mapa">Mapa por departamento</a></li>
+          <li><a href="#sexo" id="lnk-sexo">Distribución por sexo</a></li>
+          <li><a href="#situacion" id="lnk-situacion">Situación actual</a></li>
+        </ul>
+      </details>
+    </li>
+    <details open>
+        <summary><a href="#hechos" id="lnk-hechos">Otros hechos (1944–2024)</a></summary>
+        <ul>
+          <li><a href="#evolucion" id="lnk-evolucion">Evolución de 'Lesionados Civiles'</a></li>
+          <li><a href="#hechos1" id="lnk-hechos1">Hechos más frecuentes en el período</a></li>
+        </ul>
+      </details>
+      </li>
+    <li><a href="#reflexion" id="lnk-reflexion"> Hacia la paz</a></li>
+  </ul>
+</div>
+""", unsafe_allow_html=True)
+
+
+
+
+
+def anchor(id_: str):
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+
+anchor("panorama")
+
+
+# ========================
+# Portada — narrativa y KPIs
+# ========================
+st.title("Panorama nacional de casos (2000–2023)")
+st.caption("Fuente: dataset consolidado; esta versión usa tablas resumen para rendimiento. El rango aplica a todas las vistas.")
+
+st.markdown("""
+<div style="
+  background: rgba(255,255,255,0.82);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.08);
+  backdrop-filter: blur(4px);
+  font-size: 1.05rem;
+  text-align: justify;
+">
+<p>
+En este apartado se presenta una visión general de los casos reportados de desaparición forzada en el periodo seleccionado.  
+Los indicadores permiten identificar:
+</p>
+<ul>
+  <li><strong>Total en rango:</strong> la suma de todos los registros en los años escogidos.</li>
+  <li><strong>Año pico:</strong> el momento en el que se registró la mayor cantidad de casos.</li>
+  <li><strong>Variación porcentual:</strong> la diferencia relativa entre el inicio y el final del rango de análisis.</li>
+</ul>
+<p>
+Estos datos proporcionan un panorama inicial que ayuda a comprender la evolución del fenómeno en el tiempo 
+y sirven como contexto para el resto de las visualizaciones.
+</p>
+</div>
+""", unsafe_allow_html=True)
 # ========================
 # Filtro superior
 # ========================
@@ -141,11 +271,6 @@ sel_years = st.select_slider(
 
 res_f = res_anio[(res_anio["ANO"] >= sel_years[0]) & (res_anio["ANO"] <= sel_years[1])]
 
-# ========================
-# Portada — narrativa y KPIs
-# ========================
-st.title("📊 Panorama nacional de casos (2000–2023)")
-st.caption("Fuente: dataset consolidado; esta versión usa tablas resumen para rendimiento. El rango aplica a todas las vistas.")
 
 c1, c2, c3 = st.columns(3)
 if not res_f.empty:
@@ -167,7 +292,13 @@ else:
 # ========================
 # Serie temporal
 # ========================
-st.subheader("Serie anual (nacional)")
+
+def anchor(id_: str):
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+anchor("Serie")
+st.header("Serie anual (nacional)")
+
+
 fig_line = px.line(res_f, x="ANO", y="CASOS", markers=True, title="Tendencia anual")
 fig_line.update_layout(template="plotly_dark")
 fig_line.update_yaxes(tickformat=",")
@@ -181,6 +312,12 @@ st.plotly_chart(fig_line, use_container_width=True)
 # ========================
 # Top 10 departamentos
 # ========================
+def anchor(id_: str):
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+
+anchor("top10")
+
+
 if PQT_RES_ANIO_DPTO.exists():
     res_anio_dpto = load_parquet_safe(PQT_RES_ANIO_DPTO)
     res_anio_dpto.rename(columns={"AÑO":"ANO"}, inplace=True)
@@ -196,6 +333,12 @@ if PQT_RES_ANIO_DPTO.exists():
 # ========================
 # Mapa por año
 # ========================
+def anchor(id_: str):
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+
+anchor("mapa")
+
+
 if PQT_RES_ANIO_DPTO.exists():
     st.subheader("Mapa por departamento (elige un año)")
     years_map = sorted(int(y) for y in pd.to_numeric(res_anio_dpto["ANO"], errors="coerce").dropna().unique() if int(y) != 0)
@@ -258,6 +401,11 @@ with st.expander("🔍 Auditoría — ¿qué datos está usando la app ahora?"):
 # ========================
 # Sexo: carga y gráficas
 # ========================
+def anchor(id_: str):
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+anchor("sexo")
+
+
 PQT_SEXO = DATA_DIR / "resumen_dep_estado_sexo.parquet"
 if PQT_SEXO.exists():
     sexo = load_parquet_safe(PQT_SEXO).copy()
@@ -294,6 +442,12 @@ if PQT_SEXO.exists():
     # ========================
     # Situación actual de la víctima
     # ========================
+    def anchor(id_: str):
+        st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+
+    anchor("situacion")
+
+
     PQT_SIT = DATA_DIR / "resumen_dep_estado_situacion.parquet"
     if PQT_SIT.exists():
         sit = load_parquet_safe(PQT_SIT).copy()
@@ -323,7 +477,142 @@ if PQT_SEXO.exists():
                 fig_line = px.line(serie_sit, x="ANO", y="CASOS", color="SITUACION", markers=True,
                                    title="Evolución anual por situación")
                 st.plotly_chart(fig_line, use_container_width=True)
+def anchor(id_: str):
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+
+anchor("hechos")
+st.header("Otros hechos (1944–2024)")
+
+st.markdown("""
+<div style="
+  background: rgba(255,255,255,0.82);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 6px 18px rgba(15,23,42,0.08);
+  backdrop-filter: blur(4px);
+  font-size: 1.05rem;
+  text-align: justify;
+">
+
+<p>
+Además del conjunto principal, se dispone de una <strong>muestra representativa</strong> que abarca el periodo 
+<strong>1944–2024</strong>. Esta base no es exhaustiva, sino que fue construida como referencia histórica complementaria. 
+Su valor radica en ofrecer un panorama más amplio del conflicto, permitiendo observar tendencias de largo plazo, 
+identificar hitos históricos y contrastar patrones con la serie consolidada de 2002–2023.
+</p>
+
+<p>
+Es importante resaltar que, por su carácter muestral, las cifras de esta base <em>no deben compararse directamente</em> 
+con las del conjunto consolidado, sino entenderse como un insumo adicional que aporta contexto y profundidad 
+a la memoria histórica.
+</p>
+</div>
+""", unsafe_allow_html=True)
+
+# 1) Carga
+df2 = pd.read_csv(DATA_DIR / "datos2.csv")
+
+# 2) Normaliza año: quitar comas internas y convertir a int
+df2 = df2.rename(columns={"Año": "ANO"})
+df2["ANO"] = (
+    df2["ANO"]
+    .astype(str)
+    .str.replace(",", "", regex=False)      # "1,977" -> "1977"
+    .str.strip()
+)
+df2["ANO"] = pd.to_numeric(df2["ANO"], errors="coerce").astype("Int64")
+df2 = df2.dropna(subset=["ANO"]).copy()
+df2["ANO"] = df2["ANO"].astype(int)
+
+# 3) Columnas presentes (según diagnóstico)
+flag_cols_bin = [
+    "Abandono o Despojo Forzado de Tierras",
+    "Amenaza o Intimidación",
+    "Ataque Contra Misión Médica",
+    "Confinamiento o Restricción a la Movilidad",
+    "Desplazamiento Forzado",
+    "Extorsión",
+    "Pillaje",
+]
+flag_cols_bin = [c for c in flag_cols_bin if c in df2.columns]
+
+col_lesionados = "Lesionados Civiles" if "Lesionados Civiles" in df2.columns else None
+col_resp       = "Presunto Responsable" if "Presunto Responsable" in df2.columns else None
+col_armas      = "Tipo de Armas" if "Tipo de Armas" in df2.columns else None
+col_otros      = "Otro Hecho Simultáneo" if "Otro Hecho Simultáneo" in df2.columns else None
+
+# 4) Selector de años usando MIN–MAX reales de esta base
+all_years2 = sorted(df2["ANO"].unique().tolist())
+y0, y1 = st.select_slider(
+    "Rango de años (hechos)",
+    options=all_years2,
+    value=(min(all_years2), max(all_years2)),
+    key="flt_year_range_hechos"  # independiente de tu otro selector
+)
+
+df2_f = df2[(df2["ANO"] >= y0) & (df2["ANO"] <= y1)].copy()
+if df2_f.empty:
+    st.info("No hay registros en el rango seleccionado.")
+    st.stop()
+
+# ========================
+# 5) Gráficas
+# ========================
+
+
+def anchor(id_: str):
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+
+anchor("evolucion")
+# 5.2 Lesionados Civiles (conteo real)
+if col_lesionados:
+    st.subheader("Evolución de 'Lesionados Civiles'")
+    df2_f[col_lesionados] = pd.to_numeric(df2_f[col_lesionados], errors="coerce").fillna(0)
+    serie_les = df2_f.groupby("ANO")[col_lesionados].sum().reset_index()
+    if serie_les[col_lesionados].sum() > 0:
+        fig_les = px.line(serie_les, x="ANO", y=col_lesionados, markers=True,
+                          title="Total anual de lesionados civiles")
+        st.plotly_chart(fig_les, use_container_width=True)
+    else:
+        st.info("No hay valores > 0 en 'Lesionados Civiles' para el rango.")
+
+def anchor(id_: str):
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+
+anchor("hechos1")
+# 5.3 Top modalidades (acumulado del período)
+if flag_cols_bin:
+    st.subheader("Hechos más frecuentes en el período")
+    totales = df2_f[flag_cols_bin].sum().sort_values(ascending=False).reset_index()
+    totales.columns = ["Hecho", "Casos"]
+    if totales["Casos"].sum() > 0:
+        fig_top = px.bar(totales.head(10), x="Casos", y="Hecho", orientation="h",
+                         title="Top 10 modalidades")
+        st.plotly_chart(fig_top, use_container_width=True)
+
+# 5.4 Presuntos responsables
+if col_resp:
+    st.subheader("Presuntos responsables")
+    resp = (df2_f[col_resp].astype(str).str.strip()
+            .replace({"": None, "nan": None, "None": None})
+            .dropna())
+    if not resp.empty:
+        resp_count = resp.value_counts().reset_index().head(10)
+        resp_count.columns = ["Responsable", "Casos"]
+        fig_resp = px.bar(resp_count, x="Casos", y="Responsable", orientation="h",
+                          title="Top presuntos responsables")
+        st.plotly_chart(fig_resp, use_container_width=True)
+    else:
+        st.info("No hay valores válidos en 'Presunto Responsable' para el rango.")
+
+
+
 st.markdown("---")
+
+def anchor(id_: str):
+    st.markdown(f"<div id='{id_}'></div>", unsafe_allow_html=True)
+
+anchor("reflexion")
 
 st.header("🕊️ Un camino hacia la paz")
 
@@ -342,7 +631,15 @@ una sociedad más justa y en paz.</p>
 </div>
 """, unsafe_allow_html=True)
 
-
-
-
-
+# ========================
+# Nueva sección: hechos victimizantes
+# ========================
+# ========================
+# Carga robusta + diagnóstico + gráficas (datos2.csv)
+# ========================
+# ========================
+# Sección: Otros hechos del conflicto (datos2.csv)
+# ========================
+# ========================
+# Sección: Otros hechos del conflicto (datos2.csv) — FIX AÑO con comas
+# ========================
